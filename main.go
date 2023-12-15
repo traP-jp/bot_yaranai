@@ -29,20 +29,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if os.Getenv("NS_MARIADB_USER") == "" {
+	if os.Getenv("MARIADB_USER") == "" {
 		err = godotenv.Load(".env")
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
-	fmt.Println(os.Getenv("NS_MARIADB_USER"))
+	fmt.Println(os.Getenv("MARIADB_USER"))
 	fmt.Println("aa")
 	conf := mysql.Config{
-		User:                 os.Getenv("NS_MARIADB_USER"),
-		Passwd:               os.Getenv("NS_MARIADB_PASSWORD"),
+		User:                 os.Getenv("MARIADB_USER"),
+		Passwd:               os.Getenv("MARIADB_PASSWORD"),
 		Net:                  "tcp",
-		Addr:                 os.Getenv("NS_MARIADB_HOSTNAME") + ":" + os.Getenv("NS_MARIADB_PORT"),
-		DBName:               os.Getenv("NS_MARIADB_DATABASE"),
+		Addr:                 os.Getenv("MARIADB_HOSTNAME") + ":" + os.Getenv("MARIADB_PORT"),
+		DBName:               os.Getenv("MARIADB_DATABASE"),
 		ParseTime:            true,
 		Collation:            "utf8mb4_unicode_ci",
 		Loc:                  jst,
