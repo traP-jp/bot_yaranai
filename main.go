@@ -2,11 +2,20 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 	traqwsbot "github.com/traPtitech/traq-ws-bot"
 	"github.com/traPtitech/traq-ws-bot/payload"
+)
+
+var (
+	db *sqlx.DB
 )
 
 func main() {
@@ -16,23 +25,42 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	jst, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if os.Getenv("NS_MARIADB_USER") == "" {
+		err = godotenv.Load(".env")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	fmt.Println(os.Getenv("NS_MARIADB_USER"))
+	fmt.Println("aa")
+	conf := mysql.Config{
+		User:                 os.Getenv("NS_MARIADB_USER"),
+		Passwd:               os.Getenv("NS_MARIADB_PASSWORD"),
+		Net:                  "tcp",
+		Addr:                 os.Getenv("NS_MARIADB_HOSTNAME") + ":" + os.Getenv("NS_MARIADB_PORT"),
+		DBName:               os.Getenv("NS_MARIADB_DATABASE"),
+		ParseTime:            true,
+		Collation:            "utf8mb4_unicode_ci",
+		Loc:                  jst,
+		AllowNativePasswords: true,
+	}
+
+	_db, err := sqlx.Open("mysql", conf.FormatDSN())
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("conntected")
+	db = _db
 	bot.OnMessageCreated(func(p *payload.MessageCreated) {
 		fmt.Println(p.Message.Text)
 		cmd := strings.Split(p.Message.Text, " ")
-		if cmd[1] == "stamp" {
-			if cmd[2] == "recent" {
-				if len(cmd) > 3 && cmd[3] == "user" {
-					checkUserHandrer(bot, p)
-				} else {
-					checkHandrer(bot, p)
-				}
-			} else if cmd[2] == "count" {
-				stampCountHandrer(bot, p)
-			} else {
-				simplePost(bot, p.Message.ChannelID, "No such command")
-			}
-		} else if cmd[1] == "heatmap" {
-			heatMapHandrer(bot, p)
+		if cmd[1] == "task" {
+			getTest(bot, p.Message.ChannelID)
 		} else if cmd[1] == "help" {
 			bytes, err := os.ReadFile("help.txt")
 			if err != nil {

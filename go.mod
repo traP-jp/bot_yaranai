@@ -3,6 +3,9 @@ module ramdos_bot
 go 1.20
 
 require (
+	github.com/go-sql-driver/mysql v1.7.0
+	github.com/jmoiron/sqlx v1.3.5
+	github.com/joho/godotenv v1.5.1
 	github.com/traPtitech/go-traq v0.0.0-20230720010114-3bada4b8a73a
 	github.com/traPtitech/traq-ws-bot v1.1.2
 )
