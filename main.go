@@ -67,6 +67,38 @@ func main() {
 				panic(err)
 			}
 			simplePost(bot, p.Message.ChannelID, string(bytes))
+		} else if cmd[1] == "condition" {
+			if len(cmd) == 2 {
+				bytes, err := os.ReadFile("help.txt")
+				if err != nil {
+					panic(err)
+				}
+				simplePost(bot, p.Message.ChannelID, string(bytes))
+			} else {
+				switch cmd[2] {
+				case "list":
+					getCondition(bot, p.Message.ChannelID)
+				case "add":
+					if len(cmd) == 3 {
+						simplePost(bot, p.Message.ChannelID, "Name cannot be empty")
+					} else {
+						postCondition(bot, p.Message.ChannelID, strings.Join(cmd[3:]," "))
+					}
+				case "delete":
+					if len(cmd) != 4 {
+						simplePost(bot, p.Message.ChannelID, "Please specify a condition_id")
+					} else {
+						postCondition(bot, p.Message.ChannelID, cmd[3])
+					}
+
+				default:
+					bytes, err := os.ReadFile("help.txt")
+					if err != nil {
+						panic(err)
+					}
+					simplePost(bot, p.Message.ChannelID, "No such command\n"+string(bytes))
+				}
+			}
 		} else {
 			simplePost(bot, p.Message.ChannelID, "No such command")
 		}

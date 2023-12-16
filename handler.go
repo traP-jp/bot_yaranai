@@ -18,3 +18,5 @@ func getTest(bot *traqwsbot.Bot, channelID string) {
 	simplePost(bot, channelID, res)
 
 }
+
+
