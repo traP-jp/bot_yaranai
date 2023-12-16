@@ -60,6 +60,9 @@ func main() {
 	bot.OnMessageCreated(func(p *payload.MessageCreated) {
 		fmt.Println(p.Message.Text)
 		cmd := strings.Split(p.Message.Text, " ")
+
+		userID := p.Message.User.ID
+
 		if cmd[1] == "task" {
 			if len(cmd) == 2 {
 				getTest(bot, p.Message.ChannelID)
@@ -71,7 +74,7 @@ func main() {
 					newTask.ConditionId, _ = strconv.Atoi(cmd[5])
 					newTask.Difficulty, _ = strconv.Atoi(cmd[6])
 					newTask.DueDate = cmd[7]
-					postTask(bot, p.Message.ChannelID, newTask)
+					postTask(bot, userID, p.Message.ChannelID, newTask)
 				} else {
 					simplePost(bot, p.Message.ChannelID, "No such command")
 				}
