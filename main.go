@@ -68,6 +68,7 @@ func main() {
 			}
 			simplePost(bot, p.Message.ChannelID, string(bytes))
 		} else if cmd[1] == "condition" {
+			//単にconditionと打たれただけならヘルプを表示
 			if len(cmd) == 2 {
 				bytes, err := os.ReadFile("help.txt")
 				if err != nil {
@@ -76,22 +77,34 @@ func main() {
 				simplePost(bot, p.Message.ChannelID, string(bytes))
 			} else {
 				switch cmd[2] {
-				case "list":
+				case "list"://ユーザー毎コンディションリストの取得
+					getCondition(bot, p.Message.ChannelID)
+				case "dlist"://デバッグ用:全コンディションリストの取得
 					debuggetCondition(bot, p.Message.ChannelID)
-				case "add":
+				case "add"://コンディションの追加(POST: /condition に相当)
+					//引数不足の場合
 					if len(cmd) == 3 {
 						simplePost(bot, p.Message.ChannelID, "Name cannot be empty")
 					} else {
-						postCondition(bot, p.Message.ChannelID, strings.Join(cmd[3:]," "))
+						postCondition(bot, p.Message.ChannelID, strings.Join(cmd[3:], " "))
 					}
-				case "delete":
+				case "edit"://コンディションの編集(PUT: /condition に相当)
+				  //引数不足の場合(id不足, name不足 入替パターンについてはidが数値変換できなかった場合のエラー(ハンドラ内)で拾う)
+					if len(cmd) == 3 {
+						simplePost(bot, p.Message.ChannelID, "Please specify a condition_id")
+					} else if len(cmd) == 4 {
+						simplePost(bot, p.Message.ChannelID, "Name cannot be empty")
+					} else {
+						putCondition(bot, p.Message.ChannelID, cmd[3], strings.Join(cmd[4:], " "))
+					}
+				case "delete"://コンディションの消去(DELETE: /condition に相当)
 					if len(cmd) != 4 {
 						simplePost(bot, p.Message.ChannelID, "Please specify a condition_id")
 					} else {
 						deleteCondition(bot, p.Message.ChannelID, cmd[3])
 					}
 
-				default:
+				default://存在しないコマンドの場合
 					bytes, err := os.ReadFile("help.txt")
 					if err != nil {
 						panic(err)

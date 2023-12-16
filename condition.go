@@ -10,18 +10,19 @@ import (
 func getCondition(bot *traqwsbot.Bot, channelID string) {
 	//状況リストの取得 User単位(traQチャンネルのUUID)で
 	var conditions []Condition
-	if err := db.Select(&conditions, "SELECT * FROM `condition` WHERE `user`=?",channelID); err != nil {
+	if err := db.Select(&conditions, "SELECT * FROM `condition` WHERE `user`=?", channelID); err != nil {
 		fmt.Println(err)
 		simplePost(bot, channelID, "There is no such condition of yours")
 		return
 	}
 
+	//状況リストの生成
 	res := "## 状況一覧\n|id|状況名|\n|---|---|\n"
 	var idstr string
 
 	for _, v := range conditions {
 		idstr = strconv.Itoa(v.Id)
-		res += "|" + idstr +  "|" + v.Name + "|\n"
+		res += "|" + idstr + "|" + v.Name + "|\n"
 	}
 	simplePost(bot, channelID, res)
 
@@ -29,6 +30,7 @@ func getCondition(bot *traqwsbot.Bot, channelID string) {
 
 func postCondition(bot *traqwsbot.Bot, channelID string, conditionreq string) {
 
+	//引数に持った情報をもとに新規作成
 	_, err := db.Exec("INSERT INTO `condition` (`user`,`condition`) VALUES(?,?)", channelID, conditionreq)
 
 	if err != nil {
@@ -46,18 +48,19 @@ func postCondition(bot *traqwsbot.Bot, channelID string, conditionreq string) {
 		return
 	}
 
+	//ログの出力
 	conditionstr := strconv.Itoa(condition)
-	//simplePost(bot, channelID, "状況の追加が完了しました。内容は以下の通りです\n| Condition_id | Condition |\n| --- | --- |\n| "+conditionstr+" | " + conditionreq + " |\n ")
-	simplePost(bot, channelID, "状況の追加が完了しました。内容は以下の通りです\n| Condition_id | user | Condition |\n| --- | --- | --- |\n| "+conditionstr+" | "+channelID+" | "+conditionreq+" |\n ")
+	simplePost(bot, channelID, "状況の追加が完了しました。内容は以下の通りです\n| Condition_id | Condition |\n| --- | --- |\n| "+conditionstr+" | "+conditionreq+" |\n ")
 
 }
 
-func putCondition(bot *traqwsbot.Bot, channelID string, conditionreq string, conditionidstr string) {
+func putCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string, conditionreq string) {
+	//更新対象コンディションの取得
 	conditionid, err := strconv.Atoi(conditionidstr)
 
 	if err != nil {
 		fmt.Println(err)
-		simplePost(bot, channelID, "Please enter a valid condition_id")
+		simplePost(bot, channelID, "Please enter a valid condition_id\n`condition edit {id} {hoge}`")
 		return
 	}
 
@@ -71,9 +74,21 @@ func putCondition(bot *traqwsbot.Bot, channelID string, conditionreq string, con
 		simplePost(bot, channelID, "There is no such condition of yours")
 		return
 	}
+
+	//UPDATEの実行
+	_, err = db.Exec("UPDATE `condition` set `condition`=? WHERE `condition_id` =?", conditionreq, conditionid)
+	if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "Failed to rename condition")
+		return
+	}
+
+	simplePost(bot, channelID, "状況の編集が完了しました。内容は以下の通りです\n| Condition_id | Condition |\n| --- | --- |\n| "+conditionidstr+" | "+conditionreq+" |\n ")
+
 }
 
 func deleteCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string) {
+	//消去対象コンディションの取得
 	conditionid, err := strconv.Atoi(conditionidstr)
 
 	if err != nil {
@@ -85,6 +100,7 @@ func deleteCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string
 	var condition Condition
 	err = db.Get(&condition, "SELECT * FROM `condition` WHERE `condition_id` =? ", conditionid)
 
+	//存在判定,他ユーザーのコンディションを消去不可
 	if err != nil || condition.User != channelID {
 		if err != nil {
 			fmt.Println(err)
@@ -93,6 +109,7 @@ func deleteCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string
 		return
 	}
 
+	//消去の実行
 	_, err = db.Exec("DELETE FROM `condition` WHERE `condition_id` =? ", conditionid)
 
 	if err != nil {
@@ -101,11 +118,11 @@ func deleteCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string
 		return
 	}
 
-	simplePost(bot, channelID, "状況の消去が完了しました。消去内容は以下の通りです\n| Condition_id | user | Condition |\n| --- | --- | --- |\n| "+conditionidstr+" | "+condition.User+" | "+condition.Name+" |\n ")
+	//ログの出力
+	simplePost(bot, channelID, "状況の消去が完了しました。消去内容は以下の通りです\n| Condition_id | Condition |\n| --- | --- |\n| "+conditionidstr+" | "+condition.Name+" |\n ")
 }
 
-
-//デバッグ用全コンディション取得関数
+// デバッグ用全コンディション取得関数
 func debuggetCondition(bot *traqwsbot.Bot, channelID string) {
 	//状況リストの取得
 	var conditions []Condition
