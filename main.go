@@ -59,6 +59,9 @@ func main() {
 	bot.OnMessageCreated(func(p *payload.MessageCreated) {
 		fmt.Println(p.Message.Text)
 		cmd := strings.Split(p.Message.Text, " ")
+
+		userID:= p.Message.User.ID
+
 		if cmd[1] == "task" {
 			getTest(bot, p.Message.ChannelID)
 		} else if cmd[1] == "help" {
@@ -78,7 +81,7 @@ func main() {
 			} else {
 				switch cmd[2] {
 				case "list"://ユーザー毎コンディションリストの取得
-					getCondition(bot, p.Message.ChannelID)
+					getCondition(bot, p.Message.ChannelID,userID)
 				case "dlist"://デバッグ用:全コンディションリストの取得
 					debuggetCondition(bot, p.Message.ChannelID)
 				case "add"://コンディションの追加(POST: /condition に相当)
@@ -86,7 +89,7 @@ func main() {
 					if len(cmd) == 3 {
 						simplePost(bot, p.Message.ChannelID, "Name cannot be empty")
 					} else {
-						postCondition(bot, p.Message.ChannelID, strings.Join(cmd[3:], " "))
+						postCondition(bot, p.Message.ChannelID, strings.Join(cmd[3:], " "),userID)
 					}
 				case "edit"://コンディションの編集(PUT: /condition に相当)
 				  //引数不足の場合(id不足, name不足 入替パターンについてはidが数値変換できなかった場合のエラー(ハンドラ内)で拾う)
@@ -95,13 +98,13 @@ func main() {
 					} else if len(cmd) == 4 {
 						simplePost(bot, p.Message.ChannelID, "Name cannot be empty")
 					} else {
-						putCondition(bot, p.Message.ChannelID, cmd[3], strings.Join(cmd[4:], " "))
+						putCondition(bot, p.Message.ChannelID, cmd[3], strings.Join(cmd[4:], " "),userID)
 					}
 				case "delete"://コンディションの消去(DELETE: /condition に相当)
 					if len(cmd) != 4 {
 						simplePost(bot, p.Message.ChannelID, "Please specify a condition_id")
 					} else {
-						deleteCondition(bot, p.Message.ChannelID, cmd[3])
+						deleteCondition(bot, p.Message.ChannelID, cmd[3],userID)
 					}
 
 				default://存在しないコマンドの場合

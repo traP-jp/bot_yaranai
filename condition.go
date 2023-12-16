@@ -7,10 +7,10 @@ import (
 	traqwsbot "github.com/traPtitech/traq-ws-bot"
 )
 
-func getCondition(bot *traqwsbot.Bot, channelID string) {
+func getCondition(bot *traqwsbot.Bot, channelID string, userID string) {
 	//状況リストの取得 User単位(traQチャンネルのUUID)で
 	var conditions []Condition
-	if err := db.Select(&conditions, "SELECT * FROM `condition` WHERE `user`=?", channelID); err != nil {
+	if err := db.Select(&conditions, "SELECT * FROM `condition` WHERE `user`=?", userID); err != nil {
 		fmt.Println(err)
 		simplePost(bot, channelID, "There is no such condition of yours")
 		return
@@ -28,10 +28,10 @@ func getCondition(bot *traqwsbot.Bot, channelID string) {
 
 }
 
-func postCondition(bot *traqwsbot.Bot, channelID string, conditionreq string) {
+func postCondition(bot *traqwsbot.Bot, channelID string, conditionreq string,userID string) {
 
 	//引数に持った情報をもとに新規作成
-	_, err := db.Exec("INSERT INTO `condition` (`user`,`condition`) VALUES(?,?)", channelID, conditionreq)
+	_, err := db.Exec("INSERT INTO `condition` (`user`,`condition`) VALUES(?,?)", userID, conditionreq)
 
 	if err != nil {
 		fmt.Println(err)
@@ -54,7 +54,7 @@ func postCondition(bot *traqwsbot.Bot, channelID string, conditionreq string) {
 
 }
 
-func putCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string, conditionreq string) {
+func putCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string, conditionreq string,UserID string) {
 	//更新対象コンディションの取得
 	conditionid, err := strconv.Atoi(conditionidstr)
 
@@ -67,7 +67,8 @@ func putCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string, c
 	var condition Condition
 	err = db.Get(&condition, "SELECT * FROM `condition` WHERE `condition_id` =? ", conditionid)
 
-	if err != nil || condition.User != channelID {
+	//ユーザ同一性の確認
+	if err != nil || condition.User != UserID {
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -87,7 +88,7 @@ func putCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string, c
 
 }
 
-func deleteCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string) {
+func deleteCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string, UserID string) {
 	//消去対象コンディションの取得
 	conditionid, err := strconv.Atoi(conditionidstr)
 
@@ -101,7 +102,7 @@ func deleteCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string
 	err = db.Get(&condition, "SELECT * FROM `condition` WHERE `condition_id` =? ", conditionid)
 
 	//存在判定,他ユーザーのコンディションを消去不可
-	if err != nil || condition.User != channelID {
+	if err != nil || condition.User != UserID {
 		if err != nil {
 			fmt.Println(err)
 		}
