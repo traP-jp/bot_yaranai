@@ -25,15 +25,13 @@ func getCondition(bot *traqwsbot.Bot, channelID string) {
 }
 
 func postCondition(bot *traqwsbot.Bot, channelID string, conditionreq string) {
-	var conditions []Condition
-	if err := db.Select(&conditions, "SELECT * FROM `condition`"); err != nil {
-		fmt.Println(err)
-	}
+
 	_, err := db.Exec("INSERT INTO `condition` (`user`,`condition`) VALUES(?,?)", channelID, conditionreq)
 
 	if err != nil {
 		fmt.Println(err)
 		simplePost(bot, channelID, "Failed to add condition")
+		return
 	}
 
 	//追加した状況のcondition_idを取得
@@ -42,12 +40,42 @@ func postCondition(bot *traqwsbot.Bot, channelID string, conditionreq string) {
 	if err != nil {
 		fmt.Println(err)
 		simplePost(bot, channelID, "Failed to add condition")
+		return
 	}
 
 	conditionstr := strconv.Itoa(condition)
-	//simplePost(bot, channelID, "状況の追加が完了しましあ。内容は以下の通りです\n| Condition_id | Condition |\n| --- | --- |\n| "+conditionstr+" | " + conditionreq + " |\n ")
-	simplePost(bot, channelID, "状況の追加が完了しましあ。内容は以下の通りです\n| Condition_id | user | Condition |\n| --- | --- | --- |\n| "+conditionstr+" | " + channelID +" | " + conditionreq + " |\n ")
+	//simplePost(bot, channelID, "状況の追加が完了しました。内容は以下の通りです\n| Condition_id | Condition |\n| --- | --- |\n| "+conditionstr+" | " + conditionreq + " |\n ")
+	simplePost(bot, channelID, "状況の追加が完了しました。内容は以下の通りです\n| Condition_id | user | Condition |\n| --- | --- | --- |\n| "+conditionstr+" | "+channelID+" | "+conditionreq+" |\n ")
 
 }
 
+func deleteCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string) {
+	conditionid, err := strconv.Atoi(conditionidstr)
 
+	if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "Please enter a valid condition_id")
+		return
+	}
+
+	var condition Condition
+	err = db.Get(&condition, "SELECT * FROM `condition` WHERE `condition_id` =? ", conditionid)
+
+	if err != nil || condition.User != channelID {
+		if err != nil {
+			fmt.Println(err)
+		}
+		simplePost(bot, channelID, "There is no such condition of yours")
+		return
+	}
+
+	_, err = db.Exec("DELETE FROM `condition` WHERE `condition_id` =? ", conditionid)
+
+	if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "Failed to delete condition")
+		return
+	}
+
+	simplePost(bot, channelID, "状況の消去が完了しました。消去内容は以下の通りです\n| Condition_id | user | Condition |\n| --- | --- | --- |\n| "+conditionidstr+" | "+condition.User+" | "+condition.Name+" |\n ")
+}

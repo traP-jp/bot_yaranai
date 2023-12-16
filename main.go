@@ -88,7 +88,7 @@ func main() {
 					if len(cmd) != 4 {
 						simplePost(bot, p.Message.ChannelID, "Please specify a condition_id")
 					} else {
-						postCondition(bot, p.Message.ChannelID, cmd[3])
+						deleteCondition(bot, p.Message.ChannelID, cmd[3])
 					}
 
 				default:
