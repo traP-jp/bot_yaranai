@@ -77,7 +77,7 @@ func main() {
 			} else {
 				switch cmd[2] {
 				case "list":
-					getCondition(bot, p.Message.ChannelID)
+					debuggetCondition(bot, p.Message.ChannelID)
 				case "add":
 					if len(cmd) == 3 {
 						simplePost(bot, p.Message.ChannelID, "Name cannot be empty")
