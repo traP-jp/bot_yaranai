@@ -19,10 +19,18 @@ func getTask(bot *traqwsbot.Bot, userID string, channelID string) {
 	res := "## タスク一覧\n|ID|タスク名|詳細|状況|ウェイト|期限|\n|---|---|---|---|---|---|\n"
 	for _, v := range tasks {
 		idStr := strconv.Itoa(v.Id)
-		conditionidstr := strconv.Itoa(v.ConditionId)
+
+		//与えられたcondition_idからcondition名を取得する
+		var conditionName string
+		err := db.Get(&conditionName, "SELECT `condition` FROM `condition` WHERE `condition_id`=?", v.ConditionId)
+		if err != nil {
+			fmt.Println(err)
+			simplePost(bot, channelID, "Condition get error")
+			return
+		}
 		weightstr := strconv.Itoa(v.Difficulty)
 		dueDateStr := v.DueDate.Format("2006-01-02")
-		res += "|" + idStr + "|" + v.Title + "|" + v.Description + "|" + conditionidstr + "|" + weightstr + "|" + dueDateStr + "|\n"
+		res += "|" + idStr + "|" + v.Title + "|" + v.Description + "|" + conditionName + "|" + weightstr + "|" + dueDateStr + "|\n"
 	}
 	simplePost(bot, channelID, res)
 }
@@ -44,10 +52,18 @@ func postTask(bot *traqwsbot.Bot, userID string, channelID string, newTask TaskW
 		return
 	}
 
-	idstr := strconv.Itoa(newTask.ConditionId)
+	//与えられたcondition_idからcondition名を取得する
+	var conditionName string
+	err = db.Get(&conditionName, "SELECT `condition` FROM `condition` WHERE `condition_id`=?", newTask.ConditionId)
+	if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "Condition get error")
+		return
+	}
+
 	weightstr := strconv.Itoa(newTask.Difficulty)
 
-	resStr := "## タスクを追加しました！\n|ID|タスク名|詳細|状況|ウェイト|期限|\n|---|---|---|---|---|---|\n|" + strconv.Itoa(int(taskID)) + "|" + newTask.Title + "|" + newTask.Description + "|" + idstr + "|" + weightstr + "|" + newTask.DueDate + "|\n"
+	resStr := "## タスクを追加しました！\n|ID|タスク名|詳細|状況|ウェイト|期限|\n|---|---|---|---|---|---|\n|" + strconv.Itoa(int(taskID)) + "|" + newTask.Title + "|" + newTask.Description + "|" + conditionName + "|" + weightstr + "|" + newTask.DueDate + "|\n"
 	simplePost(bot, channelID, resStr)
 }
 
@@ -127,12 +143,20 @@ func putTask(bot *traqwsbot.Bot, taskID int, userID string, channelID string, ch
 		return
 	}
 
-	conditionIdInt := strconv.Itoa(updatedTask.ConditionId)
+	//与えられたcondition_idからcondition名を取得する
+	var conditionName string
+	err = db.Get(&conditionName, "SELECT `condition` FROM `condition` WHERE `condition_id`=?", updatedTask.ConditionId)
+	if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "Condition get error")
+		return
+	}
+
 	difficultyInt := strconv.Itoa(updatedTask.Difficulty)
 
 	dueDateStr := updatedTask.DueDate.Format("2006-01-02")
 
-	resStr := "## タスクを変更しました。\n変更結果\n|タスク名|詳細|状況|ウェイト|期限|\n|---|---|---|---|---|\n|" + updatedTask.Title + "|" + updatedTask.Description + "|" + conditionIdInt + "|" + difficultyInt + "|" + dueDateStr + "|\n"
+	resStr := "## タスクを変更しました。\n変更結果\n|タスク名|詳細|状況|ウェイト|期限|\n|---|---|---|---|---|\n|" + updatedTask.Title + "|" + updatedTask.Description + "|" + conditionName + "|" + difficultyInt + "|" + dueDateStr + "|\n"
 
 	simplePost(bot, channelID, resStr)
 }
@@ -168,10 +192,18 @@ func deleteTask(bot *traqwsbot.Bot, userID string, channelID string, taskIDstr s
 		return
 	}
 
-	idstr := strconv.Itoa(task.ConditionId)
+	//与えられたcondition_idからcondition名を取得する
+	var conditionName string
+	err = db.Get(&conditionName, "SELECT `condition` FROM `condition` WHERE `condition_id`=?", task.ConditionId)
+	if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "Condition get error")
+		return
+	}
+
 	weightstr := strconv.Itoa(task.Difficulty)
 	dueDateStr := task.DueDate.Format("2006-01-02")
 
 	//ログの出力
-	simplePost(bot, channelID, "タスクの消去が完了しました。消去内容は以下の通りです\n| ID | タスク名 |詳細|状況|ウェイト|期限|\n| --- | --- | --- | --- | --- | --- |\n| "+taskIDstr+" | "+task.Title+" |"+" | "+task.Description+" |"+" | "+idstr+" |"+" | "+weightstr+" |"+" | "+dueDateStr+" |\n ")
+	simplePost(bot, channelID, "タスクの消去が完了しました。消去内容は以下の通りです\n| ID | タスク名 |詳細|状況|ウェイト|期限|\n| --- | --- | --- | --- | --- | --- |\n| "+taskIDstr+" | "+task.Title+" |"+task.Description+" |"+conditionName+" |"+weightstr+" |"+dueDateStr+" |\n ")
 }
