@@ -67,14 +67,57 @@ func main() {
 			if len(cmd) == 2 {
 				getTest(bot, p.Message.ChannelID)
 			} else {
-				if cmd[2] == "post" {
-					var newTask TaskWithoutId
-					newTask.Title = cmd[3]
-					newTask.Description = cmd[4]
-					newTask.ConditionId, _ = strconv.Atoi(cmd[5])
-					newTask.Difficulty, _ = strconv.Atoi(cmd[6])
-					newTask.DueDate = cmd[7]
+				if cmd[2] == "get" {
+					getTask(bot, userID, p.Message.ChannelID)
+				} else if cmd[2] == "post" {
+					conditionIdInt, err := strconv.Atoi(cmd[5])
+					if err != nil {
+						fmt.Println(err)
+						simplePost(bot, p.Message.ChannelID, "Condition ID は数値にしてください")
+						return
+					}
+					difficultyInt, err := strconv.Atoi(cmd[6])
+					if err != nil {
+						fmt.Println(err)
+						simplePost(bot, p.Message.ChannelID, "Difficulty は数値にしてください")
+						return
+					}
+					newTask := TaskWithoutId{
+						Title:       cmd[3],
+						Description: cmd[4],
+						ConditionId: conditionIdInt,
+						Difficulty:  difficultyInt,
+						DueDate:     cmd[7],
+					}
 					postTask(bot, userID, p.Message.ChannelID, newTask)
+				} else if cmd[2] == "edit" {
+					taskId, err := strconv.Atoi(cmd[3])
+					if err != nil {
+						fmt.Println(err)
+						simplePost(bot, p.Message.ChannelID, "タスク ID は数値を入力してください。")
+						return
+					}
+					if len(cmd) != 9 {
+						if len(cmd) > 9 {
+							simplePost(bot, p.Message.ChannelID, "入力が多すぎます")
+						} else {
+							simplePost(bot, p.Message.ChannelID, "入力が少なすぎます")
+						}
+						return
+					}
+					var changeList [][2]string
+					information := [...]string{"title", "description", "condition_id", "difficulty", "dueDate"}
+					for i := 4; i < len(cmd); i++ {
+						if cmd[i] != "_" {
+							var query = [2]string{information[i-4], cmd[i]}
+							changeList = append(changeList, query)
+						}
+					}
+					if changeList == nil {
+						simplePost(bot, p.Message.ChannelID, "There is no query")
+						return
+					}
+					putTask(bot, taskId, userID, p.Message.ChannelID, changeList)
 				} else {
 					simplePost(bot, p.Message.ChannelID, "No such command")
 				}
