@@ -123,21 +123,3 @@ func deleteCondition(bot *traqwsbot.Bot, channelID string, conditionidstr string
 	simplePost(bot, channelID, "状況の消去が完了しました。消去内容は以下の通りです\n| Condition_id | Condition |\n| --- | --- |\n| "+conditionidstr+" | "+condition.Name+" |\n ")
 }
 
-// デバッグ用全コンディション取得関数
-func debuggetCondition(bot *traqwsbot.Bot, channelID string) {
-	//状況リストの取得
-	var conditions []Condition
-	if err := db.Select(&conditions, "SELECT * FROM `condition`"); err != nil {
-		fmt.Println(err)
-	}
-
-	res := "## 状況一覧\n|id|user|状況名|\n|---|---|---|\n"
-	var idstr string
-
-	for _, v := range conditions {
-		idstr = strconv.Itoa(v.Id)
-		res += "|" + idstr + "|" + v.User + "|" + v.Name + "|\n"
-	}
-	simplePost(bot, channelID, res)
-
-}
