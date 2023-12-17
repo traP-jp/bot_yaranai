@@ -75,12 +75,7 @@ func main() {
 				case "get":
 					getTask(bot, userID, p.Message.ChannelID)
 				case "add":
-					conditionIdInt, err := strconv.Atoi(cmd[5])
-					if err != nil {
-						fmt.Println(err)
-						simplePost(bot, p.Message.ChannelID, "Condition ID は数値にしてください")
-						return
-					}
+					conditionName := cmd[5]
 					difficultyInt, err := strconv.Atoi(cmd[6])
 					if err != nil {
 						fmt.Println(err)
@@ -90,11 +85,10 @@ func main() {
 					newTask := TaskWithoutId{
 						Title:       cmd[3],
 						Description: cmd[4],
-						ConditionId: conditionIdInt,
 						Difficulty:  difficultyInt,
 						DueDate:     cmd[7],
 					}
-					postTask(bot, userID, p.Message.ChannelID, newTask)
+					postTask(bot, userID, p.Message.ChannelID, newTask,conditionName)
 				case "edit": //タスクの編集(PUT: /task に相当)
 					taskId, err := strconv.Atoi(cmd[3])
 					if err != nil {
