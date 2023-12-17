@@ -10,7 +10,7 @@ type Task struct {
 	Id          int       `json:"id" db:"id"`
 	Title       string    `json:"title" db:"title"`
 	Description string    `json:"description" db:"description"`
-	ConditionId int       `json:"condition" db:"condition_id"`
+	ConditionId int       `json:"condition_id" db:"condition_id"`
 	Difficulty  int       `json:"difficulty" db:"difficulty"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
@@ -20,14 +20,14 @@ type TaskRes struct {
 	Id          int    `json:"id" db:"id"`
 	Title       string `json:"title" db:"title"`
 	Description string `json:"description" db:"description"`
-	ConditionId int    `json:"condition" db:"condition_id"`
+	ConditionId int    `json:"condition_id" db:"condition_id"`
 	Difficulty  int    `json:"difficulty" db:"difficulty"`
 	DueDate     string `json:"dueDate" db:"dueDate"`
 }
 type TaskWithoutId struct {
 	Title       string `json:"title" db:"title"`
 	Description string `json:"description" db:"description"`
-	ConditionId int    `json:"condition" db:"condition_id"`
+	ConditionId int    `json:"condition_id" db:"condition_id"`
 	Difficulty  int    `json:"difficulty" db:"difficulty"`
 	DueDate     string `json:"dueDate" db:"dueDate"`
 }
