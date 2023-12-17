@@ -68,40 +68,46 @@ func main() {
 				getTest(bot, p.Message.ChannelID)
 			} else {
 				switch cmd[2] {
+        case "get":
+          getTask(bot, userID, p.Message.ChannelID)
 				case "post":
-					if len(cmd) != 8 {
-						simplePost(bot, p.Message.ChannelID, "Invalid command")
-						bytes, err := os.ReadFile("help.txt")
-						if err != nil {
-							panic(err)
-						}
-						simplePost(bot, p.Message.ChannelID, string(bytes))
-					} else {
-						var newTask TaskWithoutId
-						newTask.Title = cmd[3]
-						newTask.Description = cmd[4]
-						newTask.ConditionId, _ = strconv.Atoi(cmd[5])
-						newTask.Difficulty, _ = strconv.Atoi(cmd[6])
-						newTask.DueDate = cmd[7]
-						postTask(bot, userID, p.Message.ChannelID, newTask)
+					conditionIdInt, err := strconv.Atoi(cmd[5])
+					if err != nil {
+						fmt.Println(err)
+						simplePost(bot, p.Message.ChannelID, "Condition ID は数値にしてください")
+						return
 					}
-				// case "edit": //タスクの編集(PUT: /task に相当)
-				// 	if len(cmd) != 9 {
-				// 		simplePost(bot, p.Message.ChannelID, "Invalid command")
-				// 		bytes, err := os.ReadFile("help.txt")
-				// 		if err != nil {
-				// 			panic(err)
-				// 		}
-				// 		simplePost(bot, p.Message.ChannelID, string(bytes))
-				// 	} else {
-				// 		var newTask TaskWithoutId
-				// 		newTask.Title = cmd[4]
-				// 		newTask.Description = cmd[5]
-				// 		newTask.ConditionId, _ = strconv.Atoi(cmd[6])
-				// 		newTask.Difficulty, _ = strconv.Atoi(cmd[7])
-				// 		newTask.DueDate = cmd[8]
-				// 		postTask(bot, userID, p.Message.ChannelID, newTask)
-				// 	}
+					difficultyInt, err := strconv.Atoi(cmd[6])
+					if err != nil {
+						fmt.Println(err)
+						simplePost(bot, p.Message.ChannelID, "Difficulty は数値にしてください")
+						return
+					}
+					newTask := TaskWithoutId{
+						Title:       cmd[3],
+						Description: cmd[4],
+						ConditionId: conditionIdInt,
+						Difficulty:  difficultyInt,
+						DueDate:     cmd[7],
+					}
+					postTask(bot, userID, p.Message.ChannelID, newTask)
+				case "edit": //タスクの編集(PUT: /task に相当)
+					taskId, err := strconv.Atoi(cmd[3])
+					if err != nil {
+						fmt.Println(err)
+						simplePost(bot, p.Message.ChannelID, "タスク ID は数値を入力してください。")
+						return
+					}
+					if len(cmd) != 9 {
+						if len(cmd) > 9 {
+							simplePost(bot, p.Message.ChannelID, "入力が多すぎます")
+						} else {
+							simplePost(bot, p.Message.ChannelID, "入力が少なすぎます")
+						}
+						return
+					}
+					var changeList = cmd[4:]
+					putTask(bot, taskId, userID, p.Message.ChannelID, [5]string(changeList))
 				case "delete": //コンディションの消去(DELETE: /condition に相当)
 					if len(cmd) != 4 {
 						simplePost(bot, p.Message.ChannelID, "Please specify a taskid")
