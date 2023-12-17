@@ -38,3 +38,5 @@ func postTask(bot *traqwsbot.Bot, userId string, channelID string, newTask TaskW
 	resStr := "## タスクを追加しました！\n|ID|タスク名|期限|追加日|\n|---|---|---|---|\n|" + strconv.Itoa(int(taskId)) + "|" + newTask.Title + "|" + newTask.DueDate + "|" + dateOfNow + "|\n"
 	simplePost(bot, channelID, resStr)
 }
+
+
