@@ -61,7 +61,7 @@ func main() {
 		fmt.Println(p.Message.Text)
 		cmd := strings.Split(p.Message.Text, " ")
 
-		userID := p.Message.User.ID
+		userID := p.Message.User.Name
 
 		if cmd[1] == "task" {
 			if len(cmd) == 2 {
