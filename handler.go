@@ -126,11 +126,6 @@ func putTask(bot *traqwsbot.Bot, taskID int, userID string, channelID string, ch
 		return
 	}
 
-	conditionIdInt := strconv.Itoa(existingTask.ConditionId)
-	difficultyInt := strconv.Itoa(existingTask.Difficulty)
-
-	dueDateStr := existingTask.DueDate.Format("2006-01-02")
-
 	var updatedTask Task
 	err = db.Get(&updatedTask, "SELECT * FROM task WHERE `id` = ? AND `user` = ?", taskID, userID)
 	if err != nil {
@@ -138,6 +133,11 @@ func putTask(bot *traqwsbot.Bot, taskID int, userID string, channelID string, ch
 		simplePost(bot, channelID, "無効なタスク ID です")
 		return
 	}
+
+	conditionIdInt := strconv.Itoa(updatedTask.ConditionId)
+	difficultyInt := strconv.Itoa(updatedTask.Difficulty)
+
+	dueDateStr := updatedTask.DueDate.Format("2006-01-02")
 
 	resStr := "## タスクを変更しました。\n変更結果\n|タスク名|詳細|状況|こなしにくさ|期限|\n|---|---|---|---|---|\n|" + updatedTask.Title + "|" + updatedTask.Description + "|" + conditionIdInt + "|" + difficultyInt + "|" + dueDateStr + "|\n"
 
