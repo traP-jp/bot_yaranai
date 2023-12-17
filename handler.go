@@ -143,3 +143,38 @@ func putTask(bot *traqwsbot.Bot, taskID int, userID string, channelID string, ch
 
 	simplePost(bot, channelID, resStr)
 }
+
+func deleteTask(bot *traqwsbot.Bot, userID string, channelID string,  taskIDstr string) {
+	//消去対象タスクの取得
+	taskid, err := strconv.Atoi(taskIDstr)
+
+	if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "Please enter a valid taskid")
+		return
+	}
+
+	var task Task
+	err = db.Get(&task, "SELECT * FROM `task` WHERE `id` =? ", taskid)
+
+	//存在判定,他ユーザーのコンディションを消去不可
+	if err != nil || task.User != userID {
+		if err != nil {
+			fmt.Println(err)
+		}
+		simplePost(bot, channelID, "There is no such task of yours")
+		return
+	}
+
+	//消去の実行
+	_, err = db.Exec("DELETE FROM `task` WHERE `id` =? ", taskid)
+
+	if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "Failed to delete task")
+		return
+	}
+
+	//ログの出力
+	simplePost(bot, channelID, "タスクの消去が完了しました。消去内容は以下の通りです\n| ID | タスク名 |\n| --- | --- |\n| "+taskIDstr+" | "+task.Title+" |\n ")
+}

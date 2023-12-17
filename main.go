@@ -67,9 +67,10 @@ func main() {
 			if len(cmd) == 2 {
 				getTest(bot, p.Message.ChannelID)
 			} else {
-				if cmd[2] == "get" {
-					getTask(bot, userID, p.Message.ChannelID)
-				} else if cmd[2] == "post" {
+				switch cmd[2] {
+        case "get":
+          getTask(bot, userID, p.Message.ChannelID)
+				case "post":
 					conditionIdInt, err := strconv.Atoi(cmd[5])
 					if err != nil {
 						fmt.Println(err)
@@ -90,7 +91,7 @@ func main() {
 						DueDate:     cmd[7],
 					}
 					postTask(bot, userID, p.Message.ChannelID, newTask)
-				} else if cmd[2] == "edit" {
+				case "edit": //タスクの編集(PUT: /task に相当)
 					taskId, err := strconv.Atoi(cmd[3])
 					if err != nil {
 						fmt.Println(err)
@@ -107,7 +108,13 @@ func main() {
 					}
 					var changeList = cmd[4:]
 					putTask(bot, taskId, userID, p.Message.ChannelID, [5]string(changeList))
-				} else {
+				case "delete": //コンディションの消去(DELETE: /condition に相当)
+					if len(cmd) != 4 {
+						simplePost(bot, p.Message.ChannelID, "Please specify a taskid")
+					} else {
+						deleteTask(bot, userID, p.Message.ChannelID, cmd[3])
+					}
+				default:
 					simplePost(bot, p.Message.ChannelID, "No such command")
 				}
 			}
@@ -117,6 +124,51 @@ func main() {
 				panic(err)
 			}
 			simplePost(bot, p.Message.ChannelID, string(bytes))
+		} else if cmd[1] == "condition" {
+			//単にconditionと打たれただけならヘルプを表示
+			if len(cmd) == 2 {
+				bytes, err := os.ReadFile("help.txt")
+				if err != nil {
+					panic(err)
+				}
+				simplePost(bot, p.Message.ChannelID, string(bytes))
+			} else {
+				switch cmd[2] {
+				case "list": //ユーザー毎コンディションリストの取得
+					getCondition(bot, p.Message.ChannelID, userID)
+				case "dlist": //デバッグ用:全コンディションリストの取得
+					debuggetCondition(bot, p.Message.ChannelID)
+				case "add": //コンディションの追加(POST: /condition に相当)
+					//引数不足の場合
+					if len(cmd) == 3 {
+						simplePost(bot, p.Message.ChannelID, "Name cannot be empty")
+					} else {
+						postCondition(bot, p.Message.ChannelID, strings.Join(cmd[3:], " "), userID)
+					}
+				case "edit": //コンディションの編集(PUT: /condition に相当)
+					//引数不足の場合(id不足, name不足 入替パターンについてはidが数値変換できなかった場合のエラー(ハンドラ内)で拾う)
+					if len(cmd) == 3 {
+						simplePost(bot, p.Message.ChannelID, "Please specify a condition_id")
+					} else if len(cmd) == 4 {
+						simplePost(bot, p.Message.ChannelID, "Name cannot be empty")
+					} else {
+						putCondition(bot, p.Message.ChannelID, cmd[3], strings.Join(cmd[4:], " "), userID)
+					}
+				case "delete": //コンディションの消去(DELETE: /condition に相当)
+					if len(cmd) != 4 {
+						simplePost(bot, p.Message.ChannelID, "Please specify a condition_id")
+					} else {
+						deleteCondition(bot, p.Message.ChannelID, cmd[3], userID)
+					}
+
+				default: //存在しないコマンドの場合
+					bytes, err := os.ReadFile("help.txt")
+					if err != nil {
+						panic(err)
+					}
+					simplePost(bot, p.Message.ChannelID, "No such command\n"+string(bytes))
+				}
+			}
 		} else {
 			simplePost(bot, p.Message.ChannelID, "No such command")
 		}
