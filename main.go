@@ -68,8 +68,8 @@ func main() {
 				getTest(bot, p.Message.ChannelID)
 			} else {
 				switch cmd[2] {
-        case "get":
-          getTask(bot, userID, p.Message.ChannelID)
+				case "get":
+					getTask(bot, userID, p.Message.ChannelID)
 				case "post":
 					conditionIdInt, err := strconv.Atoi(cmd[5])
 					if err != nil {
@@ -134,11 +134,9 @@ func main() {
 				simplePost(bot, p.Message.ChannelID, string(bytes))
 			} else {
 				switch cmd[2] {
-				case "list": //ユーザー毎コンディションリストの取得
+				case "get": //ユーザー毎コンディションリストの取得
 					getCondition(bot, p.Message.ChannelID, userID)
-				case "dlist": //デバッグ用:全コンディションリストの取得
-					debuggetCondition(bot, p.Message.ChannelID)
-				case "add": //コンディションの追加(POST: /condition に相当)
+				case "post": //コンディションの追加(POST: /condition に相当)
 					//引数不足の場合
 					if len(cmd) == 3 {
 						simplePost(bot, p.Message.ChannelID, "Name cannot be empty")
