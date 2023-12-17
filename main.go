@@ -61,7 +61,7 @@ func main() {
 		fmt.Println(p.Message.Text)
 		cmd := strings.Split(p.Message.Text, " ")
 
-		userID := p.Message.User.ID
+		userID := p.Message.User.Name
 
 		if cmd[1] == "task" {
 			if len(cmd) == 2 {
@@ -74,7 +74,7 @@ func main() {
 				switch cmd[2] {
 				case "get":
 					getTask(bot, userID, p.Message.ChannelID)
-				case "post":
+				case "add":
 					conditionIdInt, err := strconv.Atoi(cmd[5])
 					if err != nil {
 						fmt.Println(err)
@@ -140,7 +140,7 @@ func main() {
 				switch cmd[2] {
 				case "get": //ユーザー毎コンディションリストの取得
 					getCondition(bot, p.Message.ChannelID, userID)
-				case "post": //コンディションの追加(POST: /condition に相当)
+				case "add": //コンディションの追加(POST: /condition に相当)
 					//引数不足の場合
 					if len(cmd) == 3 {
 						simplePost(bot, p.Message.ChannelID, "Name cannot be empty")
