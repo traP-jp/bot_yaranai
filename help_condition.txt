@@ -1,0 +1,33 @@
+## condition コマンド
+
+- コマンド `condition` のヘルプ
+    - 状況のコマンドのヘルプを表示します
+    - `@BOT_yaranai condition`
+
+- `get` 状況の取得
+    - 登録している全コンディションを表示します
+    - `@BOT_yaranai condition`
+
+- `add` 状況の追加
+    - 新しく状況を追加します
+    - `@BOT_yaranai condition add "Name"`
+        - "Name" 状況名
+    - 入力例
+        - `@BOT_yaranai condition add 電車の中でできる`
+
+- `edit` 状況の編集
+    - 現在登録されている状況の内容を編集します
+    - `@BOT_yaranai condition edit ConditionID "Name"`
+        - ConditionID 状況
+            - `@BOT_yaranai condition get` の左の列に表示される ID
+        - "Name" 状況名
+    - 入力例
+        - `@BOT_yaranai condition edit 1 電車の中でなら可能`
+
+- `delete` 状況の削除
+    - 現在登録されている状況を削除します
+    - `@BOT_yaranai condition delete ConditionID`
+        - ConditionID 状況
+            - `@BOT_yaranai condition get` の左の列に表示される ID
+    - 入力例
+        - `@BOT_yaranai condition delete 1`

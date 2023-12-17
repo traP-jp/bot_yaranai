@@ -65,7 +65,11 @@ func main() {
 
 		if cmd[1] == "task" {
 			if len(cmd) == 2 {
-				getTest(bot, p.Message.ChannelID)
+				bytes, err := os.ReadFile("help_task.txt")
+				if err != nil {
+					panic(err)
+				}
+				simplePost(bot, p.Message.ChannelID, string(bytes))
 			} else {
 				switch cmd[2] {
 				case "get":
@@ -127,7 +131,7 @@ func main() {
 		} else if cmd[1] == "condition" {
 			//単にconditionと打たれただけならヘルプを表示
 			if len(cmd) == 2 {
-				bytes, err := os.ReadFile("help.txt")
+				bytes, err := os.ReadFile("help_condition.txt")
 				if err != nil {
 					panic(err)
 				}
