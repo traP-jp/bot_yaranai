@@ -4,17 +4,25 @@
 
 新感覚タスクアプリ **Yaranai**
 
+タスクを構成する要素
+- こなしやすさ
+- 時間帯ごとの作業環境
+- 締め切り
+などをもとに、今おすすめのタスクを提案
+
+[ブラウザ](//yaranai.trap.show/) からもアクセス可能
+
 リポジトリ一覧
-- [フロントエンド](https://github.com/traP-jp/yaranai_frontend)
-- [バックエンド](https://github.com/traP-jp/yaranai-backend)
-- [traQ BOT 連携](https://github.com/traP-jp/bot_yaranai)
+- [フロントエンド](//github.com/traP-jp/yaranai_frontend)
+- [バックエンド](//github.com/traP-jp/yaranai-backend)
+- [traQ BOT 連携](//github.com/traP-jp/bot_yaranai)
 
 ### 機能一覧
 
 #### task コマンド
 
 - コマンド `task` のヘルプ
-    - タスクのコマンドのヘルプを表示します
+    - タスクのコマンドの詳細なヘルプを表示します
     - `@BOT_yaranai task`
 
 - `get` タスクの取得
@@ -24,40 +32,12 @@
 - `add` タスクの追加
     - 新しくタスクを追加します
     - `@BOT_yaranai task add "Title" "Description" ConditionID Difficulty "DueDate"`
-        - "Title" タスク名
-        - "Description" タスクの詳細
-        - ConditionID タスクをこなせる状況
-            - `@BOT_yaranai condition get` で一番左の列に表示される ID
-        - Difficulty タスクのコスト(ウェイト)
-            - 1 軽い
-            - 2 普通
-            - 3 重い
-        - DueDate タスクの期限
-            - `yyyy-mm-dd`
-                - `yyyy`: 年
-                - `mm`  : 月
-                - `dd`  : 日
     - 入力例
         - `@BOT_yaranai task add 醤油を買う 無いので 1 2 2099-12-31`
         
 - `edit` タスクの編集
     - 現在登録されているタスクの内容を編集します
     - `@BOT_yaranai task edit TaskID "Title" "Description" ConditionID Difficulty "DueDate"`
-        - TaskID 各タスク固有のID
-            - `@BOT_yaranai task get` の一番左の列に表示される ID
-        - "Title" タスク名
-        - "Description" タスクの詳細
-        - ConditionID タスクをこなせる状況
-            - `@BOT_yaranai condition get` で一番左の列に表示される ID
-        - Difficulty タスクのコスト(ウェイト)
-            - 1 軽い
-            - 2 普通
-            - 3 重い
-        - DueDate タスクの期限
-            - `yyyy-mm-dd`
-                - `yyyy`: 年
-                - `mm`  : 月
-                - `dd`  : 日
         - 変更しない要素は アンダーバー (`_`) を置く
     - 入力例
         - `@BOT_yaranai task edit 1 _ 醤油がないので _ 1 2100-01-01`
@@ -65,15 +45,13 @@
 - `delete` タスクの削除
     - 現在登録されているタスクを削除します
     - `@BOT_yaranai task delete TaskID`
-        - TaskID 各タスク固有のID
-            - `@BOT_yaranai task get` の一番左の列に表示される ID
     - 入力例
         - `@BOT_yaranai task delete 1`
 
 #### condition コマンド
 
 - コマンド `condition` のヘルプ
-    - 状況のコマンドのヘルプを表示します
+    - 状況のコマンドの詳細なヘルプを表示します
     - `@BOT_yaranai condition`
 
 - `get` 状況の取得
@@ -83,23 +61,17 @@
 - `add` 状況の追加
     - 新しく状況を追加します
     - `@BOT_yaranai condition add "Name"`
-        - "Name" 状況名
     - 入力例
         - `@BOT_yaranai condition add 電車の中でできる`
 
 - `edit` 状況の編集
     - 現在登録されている状況の内容を編集します
     - `@BOT_yaranai condition edit ConditionID "Name"`
-        - ConditionID 状況
-            - `@BOT_yaranai condition get` の左の列に表示される ID
-        - "Name" 状況名
     - 入力例
         - `@BOT_yaranai condition edit 1 電車の中でなら可能`
 
 - `delete` 状況の削除
     - 現在登録されている状況を削除します
     - `@BOT_yaranai condition delete ConditionID`
-        - ConditionID 状況
-            - `@BOT_yaranai condition get` の左の列に表示される ID
     - 入力例
         - `@BOT_yaranai condition delete 1`
