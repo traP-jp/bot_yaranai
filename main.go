@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -60,10 +61,24 @@ func main() {
 		fmt.Println(p.Message.Text)
 		cmd := strings.Split(p.Message.Text, " ")
 
-		userID:= p.Message.User.ID
+		userID := p.Message.User.ID
 
 		if cmd[1] == "task" {
-			getTest(bot, p.Message.ChannelID)
+			if len(cmd) == 2 {
+				getTest(bot, p.Message.ChannelID)
+			} else {
+				if cmd[2] == "post" {
+					var newTask TaskWithoutId
+					newTask.Title = cmd[3]
+					newTask.Description = cmd[4]
+					newTask.ConditionId, _ = strconv.Atoi(cmd[5])
+					newTask.Difficulty, _ = strconv.Atoi(cmd[6])
+					newTask.DueDate = cmd[7]
+					postTask(bot, userID, p.Message.ChannelID, newTask)
+				} else {
+					simplePost(bot, p.Message.ChannelID, "No such command")
+				}
+			}
 		} else if cmd[1] == "help" {
 			bytes, err := os.ReadFile("help.txt")
 			if err != nil {
