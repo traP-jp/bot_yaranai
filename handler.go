@@ -58,63 +58,88 @@ func postTask(bot *traqwsbot.Bot, userID string, channelID string, newTask TaskW
 	simplePost(bot, channelID, resStr)
 }
 
-func putTask(bot *traqwsbot.Bot, taskID int, userID string, channelID string, changeList [][2]string) {
+func putTask(bot *traqwsbot.Bot, taskID int, userID string, channelID string, changeList [5]string) {
 	var existingTask Task
 	err := db.Get(&existingTask, "SELECT * FROM task WHERE `id` = ? AND `user` = ?", taskID, userID)
 	if err != nil {
-		fmt.Println(taskID)
-		fmt.Println(userID)
 		fmt.Println(err)
 		simplePost(bot, channelID, "無効なタスク ID です")
 		return
 	}
 
-	for _, query := range changeList {
-		var err error
-		if query[0] == "condition_id" || query[0] == "difficulty" {
-			queryInt, err := strconv.Atoi(query[1])
-			if err != nil && query[0] == "condition_id" {
-				fmt.Println(query[1])
-				fmt.Println(err)
-				simplePost(bot, channelID, "無効な Condition ID です。")
-				return
-			} else if err != nil {
-				fmt.Println(err)
-				simplePost(bot, channelID, "無効な Difficluty です。")
-				return
-			}
-			_, err = db.Exec("UPDATE task SET ? = ? WHERE id = ? AND user = ?", query[0], queryInt, taskID, userID)
-			if err != nil {
-				fmt.Println(query[0])
-				fmt.Println(queryInt)
-				fmt.Println(err)
-				simplePost(bot, channelID, "Internal Server Error")
-				return
-			}
+	information := [...]string{"title", "description", "condition_id", "difficulty", "dueDate"}
+	var check = false
+	for i, change := range changeList {
+		if change == "_" {
+			continue
 		} else {
-			_, err = db.Exec("UPDATE task SET ? = ? WHERE id = ? AND user = ?", query[0], query[1], taskID, userID)
-			if err != nil {
-				fmt.Println(query[0])
-				fmt.Println(query[1])
-				fmt.Println(err)
-				simplePost(bot, channelID, "Internal Server Error")
-				return
+			check = true
+			if information[i] == "title" {
+				_, err = db.Exec("UPDATE task SET title = ? WHERE id = ? AND user = ?", change, taskID, userID)
+				if err != nil {
+					fmt.Println(err)
+					simplePost(bot, channelID, "Internal Server Error: Title")
+					return
+				}
+			} else if information[i] == "description" {
+				_, err = db.Exec("UPDATE task SET description = ? WHERE id = ? AND user = ?", change, taskID, userID)
+				if err != nil {
+					fmt.Println(err)
+					simplePost(bot, channelID, "Internal Server Error: Description")
+					return
+				}
+			} else if information[i] == "condition_id" {
+				_, err = db.Exec("UPDATE task SET condition_id = ? WHERE id = ? AND user = ?", change, taskID, userID)
+				if err != nil {
+					fmt.Println(err)
+					simplePost(bot, channelID, "Internal Server Error: Condition ID")
+					return
+				}
+			} else if information[i] == "difficulty" {
+				_, err = db.Exec("UPDATE task SET difficulty = ? WHERE id = ? AND user = ?", change, taskID, userID)
+				if err != nil {
+					fmt.Println(err)
+					simplePost(bot, channelID, "Internal Server Error: Difficulty")
+					return
+				}
+			} else if information[i] == "dueDate" {
+				_, err = db.Exec("UPDATE task SET dueDate = ? WHERE id = ? AND user = ?", change, taskID, userID)
+				if err != nil {
+					fmt.Println(err)
+					simplePost(bot, channelID, "Internal Server Error: DueDate")
+					return
+				}
 			}
 		}
-		nowOfDate := time.Now()
-		_, err = db.Exec("UPDATE task SET updated_at = ? WHERE id = ? AND user = ?", nowOfDate, taskID, userID)
-		if err != nil {
-			fmt.Println(err)
-			simplePost(bot, channelID, "Internal Server Error")
-			return
-		}
+	}
+
+	if !check {
+		simplePost(bot, channelID, "変更内容を入力してください。")
+		return
+	}
+
+	nowOfDate := time.Now()
+	_, err = db.Exec("UPDATE task SET updated_at = ? WHERE id = ? AND user = ?", nowOfDate, taskID, userID)
+	if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "Internal Server Error")
+		return
 	}
 
 	conditionIdInt := strconv.Itoa(existingTask.ConditionId)
 	difficultyInt := strconv.Itoa(existingTask.Difficulty)
 
 	dueDateStr := existingTask.DueDate.Format("2006-01-02")
-	resStr := "## タスクを変更しました。\n変更結果\n|タスク名|詳細|状況|こなしにくさ|期限|\n|---|---|---|---|---|\n|" + existingTask.Title + "|" + existingTask.Description + "|" + conditionIdInt + "|" + difficultyInt + "|" + dueDateStr + "|\n"
+
+	var updatedTask Task
+	err = db.Get(&updatedTask, "SELECT * FROM task WHERE `id` = ? AND `user` = ?", taskID, userID)
+	if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "無効なタスク ID です")
+		return
+	}
+
+	resStr := "## タスクを変更しました。\n変更結果\n|タスク名|詳細|状況|こなしにくさ|期限|\n|---|---|---|---|---|\n|" + updatedTask.Title + "|" + updatedTask.Description + "|" + conditionIdInt + "|" + difficultyInt + "|" + dueDateStr + "|\n"
 
 	simplePost(bot, channelID, resStr)
 }

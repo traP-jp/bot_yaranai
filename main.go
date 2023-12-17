@@ -105,19 +105,8 @@ func main() {
 						}
 						return
 					}
-					var changeList [][2]string
-					information := [...]string{"title", "description", "condition_id", "difficulty", "dueDate"}
-					for i := 4; i < len(cmd); i++ {
-						if cmd[i] != "_" {
-							var query = [2]string{information[i-4], cmd[i]}
-							changeList = append(changeList, query)
-						}
-					}
-					if changeList == nil {
-						simplePost(bot, p.Message.ChannelID, "There is no query")
-						return
-					}
-					putTask(bot, taskId, userID, p.Message.ChannelID, changeList)
+					var changeList = cmd[4:]
+					putTask(bot, taskId, userID, p.Message.ChannelID, [5]string(changeList))
 				} else {
 					simplePost(bot, p.Message.ChannelID, "No such command")
 				}
