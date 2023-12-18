@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -35,9 +37,23 @@ func getTask(bot *traqwsbot.Bot, userID string, channelID string) {
 	simplePost(bot, channelID, res)
 }
 
-func postTask(bot *traqwsbot.Bot, userID string, channelID string, newTask TaskWithoutId) {
+func postTask(bot *traqwsbot.Bot, userID string, channelID string, newTask TaskWithoutId, conditionName string) {
+
+	//与えられたcondition名からcondition_idを取得する
+	var conditionId int
+	err := db.Get(&conditionId, "SELECT `condition_id` FROM `condition` WHERE `condition`=?", conditionName)
+	if errors.Is(err, sql.ErrNoRows) {
+		fmt.Println(err)
+		simplePost(bot, channelID, "There is no such condition")
+		return
+	} else if err != nil {
+		fmt.Println(err)
+		simplePost(bot, channelID, "Condition get error")
+		return
+	}
+
 	var dateOfNow = time.Now().Format("2006-01-02")
-	res, err := db.Exec("INSERT INTO task (user, title, description, condition_id, difficulty, created_at, updated_at, dueDate) VALUES (?,?,?,?,?,?,?,?)", userID, newTask.Title, newTask.Description, newTask.ConditionId, newTask.Difficulty, dateOfNow, dateOfNow, newTask.DueDate)
+	res, err := db.Exec("INSERT INTO task (user, title, description, condition_id, difficulty, created_at, updated_at, dueDate) VALUES (?,?,?,?,?,?,?,?)", userID, newTask.Title, newTask.Description, conditionId, newTask.Difficulty, dateOfNow, dateOfNow, newTask.DueDate)
 
 	if err != nil {
 		fmt.Println(err)
@@ -53,13 +69,6 @@ func postTask(bot *traqwsbot.Bot, userID string, channelID string, newTask TaskW
 	}
 
 	//与えられたcondition_idからcondition名を取得する
-	var conditionName string
-	err = db.Get(&conditionName, "SELECT `condition` FROM `condition` WHERE `condition_id`=?", newTask.ConditionId)
-	if err != nil {
-		fmt.Println(err)
-		simplePost(bot, channelID, "Condition get error")
-		return
-	}
 
 	weightstr := strconv.Itoa(newTask.Difficulty)
 
@@ -76,7 +85,7 @@ func putTask(bot *traqwsbot.Bot, taskID int, userID string, channelID string, ch
 		return
 	}
 
-	information := [...]string{"title", "description", "condition_id", "difficulty", "dueDate"}
+	information := [...]string{"title", "description", "conditionName", "difficulty", "dueDate"}
 	var check = false
 	for i, change := range changeList {
 		if change == "_" {
@@ -97,8 +106,20 @@ func putTask(bot *traqwsbot.Bot, taskID int, userID string, channelID string, ch
 					simplePost(bot, channelID, "Internal Server Error: Description")
 					return
 				}
-			} else if information[i] == "condition_id" {
-				_, err = db.Exec("UPDATE task SET condition_id = ? WHERE id = ? AND user = ?", change, taskID, userID)
+			} else if information[i] == "conditionName" {
+				//与えられたcondition名からcondition_idを取得する
+				var conditionId int
+				err := db.Get(&conditionId, "SELECT `condition_id` FROM `condition` WHERE `condition`=?", change)
+				if errors.Is(err, sql.ErrNoRows) {
+					fmt.Println(err)
+					simplePost(bot, channelID, "There is no such condition")
+					return
+				} else if err != nil {
+					fmt.Println(err)
+					simplePost(bot, channelID, "Condition get error")
+					return
+				}
+				_, err = db.Exec("UPDATE task SET condition_id = ? WHERE id = ? AND user = ?", conditionId, taskID, userID)
 				if err != nil {
 					fmt.Println(err)
 					simplePost(bot, channelID, "Internal Server Error: Condition ID")
